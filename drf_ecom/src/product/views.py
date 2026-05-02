@@ -27,7 +27,7 @@ def get_products(request):
 
     # 2. Setup Pagination
     paginator = PageNumberPagination() # For FBVs, we manually instantiate the Paginator class
-    paginator.page_size = api_settings.PAGE_SIZE # You can also use a dynamic value from settings
+    paginator.page_size = api_settings.PAGE_SIZE # This config is defined in settings.py, but can be overridden by 'page_size' query param in request.
 
     # 3. Apply pagination to the filtered queryset
     paginated_queryset = paginator.paginate_queryset(filterset.qs, request) # .paginate_queryset returns a list of objects for the current page
@@ -40,17 +40,16 @@ def get_products(request):
 
     # 5. Return a structured response
     return paginator.get_paginated_response(serializer.data)
-    # Using get_paginated_response is the "Senior way" other than Response(serializer.data)
-    # as it includes 'next' and 'previous' links
-
-
+    # Using get_paginated_response is the better way than Response(serializer.data) as it includes 'next' and 'previous' links
 
 
 @api_view(['GET'])
 def get_product(request, pk):
-
+    # 1. Retrieve the product by primary key (id)
     product = get_object_or_404(Product, id=pk)
 
+    # 2. Serialize the product data
     serializer = ProductSerializer(product, many=False)
 
+    # 3. Return the serialized data in the response
     return Response({ "product": serializer.data })
